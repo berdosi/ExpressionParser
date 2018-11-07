@@ -6,12 +6,15 @@ namespace Automation
 {
     public class Expression
     {
-        private List<Atom> Atoms;
+        public List<Atom> Atoms { get; }
+
         public Expression(string inputString)
         {
             this.Atoms = new List<Atom>();
             string input = inputString;
             bool inString = false;
+            int level = 0;
+            
             Regex parenOpen = new Regex(@"^\(");
             Regex parenClose = new Regex(@"^\)");
 
@@ -28,9 +31,7 @@ namespace Automation
             Regex inStringFinalQuote = new Regex("^\"");
 
             Regex whiteSpaceOnly = new Regex(@"^\s+$");
-
-            int level = 0;
-            Console.Out.WriteLine(input.Remove(0,1));
+            
             while ((input != ""))
             {
                 if (!inString)
@@ -89,13 +90,13 @@ namespace Automation
                     if (inStringDoubleQuote.IsMatch(input))
                     {
                         var atom = Atoms[Atoms.Count -1];
-                        atom.contentString += "\"";
+                        atom.content += "\"";
                         input = input.Remove(0, 2);
                     }
                     else if (inStringNoQuote.IsMatch(input))
                     {
                         var atom = Atoms[Atoms.Count -1];
-                        atom.contentString += inStringNoQuote.Match(input).Value;
+                        atom.content += inStringNoQuote.Match(input).Value;
                         input = input.Remove(0, inStringNoQuote.Match(input).Value.Length);
                     }
                     else if (inStringFinalQuote.IsMatch(input))
@@ -106,13 +107,8 @@ namespace Automation
                 }
             }
         }
-        public int AtomCount
-        {
-            get { return this.Atoms.Count;}
-        }
-        
     }
-    enum AtomType
+    public enum AtomType
     {
         FunctionCall,
         Number,
@@ -120,19 +116,17 @@ namespace Automation
         String,
         Variable,
     }
-    class Atom
+    public class Atom
     {
-        public string contentString;
-        public readonly Decimal contentDecimal;
+        public string content;
         public readonly int level;
         public readonly AtomType type;
 
-        public Atom(AtomType type, string contentString, int level)
+        public Atom(AtomType type, string content, int level)
         {
             this.level = level;
-            this.contentString = contentString;
+            this.content = content;
             this.type = type;
-            Decimal.TryParse(s: contentString, result: out contentDecimal);
         }
     }
 }
