@@ -147,7 +147,7 @@ namespace Automation
          Pun intended.
          A complex SubExpression contains a list of SubExpressions on the same level, and has a lower level than them.
 
-         SubExpressions can be evaluated.
+         SubExpressions can be evaluated. The Expression is evaulated to the result of its SubExpressions' recursive evaluation.
          */
 
         private Atom atom = null;
@@ -183,6 +183,9 @@ namespace Automation
             else // there are operators to handle
             {
                 throw new NotImplementedException("Cannot handle operators.");
+                // 1.   parse the funcion calls
+                // 2.   evaluate the operators. They are on the same level, so parse them in their order of precedence.
+                //      note, the operators are just weird-looking function calls
             }
         }
     }
