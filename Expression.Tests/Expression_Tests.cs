@@ -3,7 +3,6 @@ using Automation;
 
 namespace Automation.UnitTests {
 	public class Expression_Tests {
-		private Expression _expression;
 
 		public Expression_Tests() {
 		}
@@ -13,12 +12,12 @@ namespace Automation.UnitTests {
 			//_expression = new Automation.Expression("[variable]");
 			try
 			{
-				_expression = new Expression("[variable]");
+				Expression _expression = new Expression("2334+(1+2)");
 				Assert.True(true, "Object is initialized.");		
 			}
-			catch (System.Exception)
+			catch (System.Exception ex)
 			{
-				Assert.True(false, "Cannot initialize object.");
+				Assert.True(false, "Cannot initialize object." + ex.Message + ex.StackTrace);
 			}
 		}
 	}

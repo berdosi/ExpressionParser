@@ -9,47 +9,130 @@ namespace Automation
         private List<Atom> Atoms;
         public Expression(string inputString)
         {
+            this.Atoms = new List<Atom>();
             string input = inputString;
             bool inString = false;
+            Regex parenOpen = new Regex(@"^\(");
+            Regex parenClose = new Regex(@"^\)");
+
+            Regex whiteSpace = new Regex(@"^\s+");
+
+            Regex numeric = new Regex(@"^[0-9\\\.]+");
+            Regex variable = new Regex(@"^\[[^\]]+\]");
+            Regex operatorCharacter = new Regex(@"^[+\-*/&,]");
+            Regex functionCall = new Regex(@"^[a-zA-Z]+");
+            Regex stringStart = new Regex("^\"");
+
             Regex inStringDoubleQuote = new Regex("^\"\"");
             Regex inStringNoQuote = new Regex("^[^\"]+");
-            Regex finalQuote = new Regex("^\"");
+            Regex inStringFinalQuote = new Regex("^\"");
+
+            Regex whiteSpaceOnly = new Regex(@"^\s+$");
+
             int level = 0;
-            return;
-            while (input != "") {
-                if (!inString) {
-                } else {
-                    if (inStringDoubleQuote.IsMatch(input)) {
+            Console.Out.WriteLine(input.Remove(0,1));
+            while ((input != ""))
+            {
+                if (!inString)
+                {
+                    if (whiteSpace.IsMatch(input))
+                    {
+                        input = input.Remove(0, whiteSpace.Match(input).Value.Length);
+                    }
+                    else if (parenOpen.IsMatch(input))
+                    {
+                        level++;
+                        input = input.Remove(0, 1);
+                    }
+                    else if (parenClose.IsMatch(input))
+                    {
+                        level--;
+                        input = input.Remove(0, 1);
+                    }
+                    else if (numeric.IsMatch(input))
+                    {
+                        string contentString = numeric.Match(input).Value;
+                        Atom currentAtom = new Atom(AtomType.Number, contentString, level);
+                        this.Atoms.Add(currentAtom);
+                        input = input.Remove(0, contentString.Length);
+                    }
+                    else if (variable.IsMatch(input))
+                    {
+                        string contentString = variable.Match(input).Value;
+                        Atom currentAtom = new Atom(AtomType.Variable, contentString, level);
+                        this.Atoms.Add(currentAtom);
+                        input = input.Remove(0, contentString.Length);
+                    }
+                    else if (operatorCharacter.IsMatch(input))
+                    {
+                        string contentString = operatorCharacter.Match(input).Value;
+                        Atom currentAtom = new Atom(AtomType.Operator, contentString, level);
+                        this.Atoms.Add(currentAtom);
+                        input = input.Remove(0, contentString.Length);
+                    }
+                    else if (functionCall.IsMatch(input))
+                    {
+                        string contentString = functionCall.Match(input).Value;
+                        Atom currentAtom = new Atom(AtomType.FunctionCall, contentString, level);
+                        this.Atoms.Add(currentAtom);
+                        input = input.Remove(0, contentString.Length);
+                    }
+                    else if (stringStart.IsMatch(input))
+                    {
+                        Atom currentAtom = new Atom(AtomType.String, "", level);
+                        this.Atoms.Add(currentAtom);
+                        input = input.Remove(0, 1);
+                        inString = true;
+                    }
+                }
+                else { // inString = true
+                    if (inStringDoubleQuote.IsMatch(input))
+                    {
                         var atom = Atoms[Atoms.Count -1];
                         atom.contentString += "\"";
-                        input = input.Substring(2);
-                    } else if (inStringNoQuote.IsMatch(input)) {
+                        input = input.Remove(0, 2);
+                    }
+                    else if (inStringNoQuote.IsMatch(input))
+                    {
                         var atom = Atoms[Atoms.Count -1];
                         atom.contentString += inStringNoQuote.Match(input).Value;
-                        input = input.Substring(inStringNoQuote.Match(input).Value.Length);
-                    } else if (finalQuote.IsMatch(input)) {
+                        input = input.Remove(0, inStringNoQuote.Match(input).Value.Length);
+                    }
+                    else if (inStringFinalQuote.IsMatch(input))
+                    {
                         inString = false;
-                        input = input.Substring(1);
+                        input = input.Remove(0, 1);
                     }
                 }
             }
         }
+        public int AtomCount
+        {
+            get { return this.Atoms.Count;}
+        }
+        
     }
     enum AtomType
     {
         FunctionCall,
         Number,
         Operator,
-        Paren_Close,
-        Paren_Open,
         String,
         Variable,
     }
     class Atom
     {
         public string contentString;
-        public Atom(AtomType type, string content) {
+        public readonly Decimal contentDecimal;
+        public readonly int level;
+        public readonly AtomType type;
 
+        public Atom(AtomType type, string contentString, int level)
+        {
+            this.level = level;
+            this.contentString = contentString;
+            this.type = type;
+            Decimal.TryParse(s: contentString, result: out contentDecimal);
         }
     }
 }
