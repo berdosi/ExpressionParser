@@ -32,6 +32,7 @@ namespace Automation
 
             Regex whiteSpaceOnly = new Regex(@"^\s+$");
             
+            // create list of Atoms
             while ((input != ""))
             {
                 if (!inString)
@@ -116,6 +117,15 @@ namespace Automation
         String,
         Variable,
     }
+    public enum DataType
+    {
+        Boolean,
+        Date,
+        DateTime,
+        Number,
+        ParameterList,
+        String,
+    }
     public class Atom
     {
         public string content;
@@ -127,6 +137,88 @@ namespace Automation
             this.level = level;
             this.content = content;
             this.type = type;
+        }
+    }
+    public class SubExpression
+    {
+        /*
+         a SubExpression collects Atoms or SubExpressions on the same level.
+         The most atomic SubExpression only contains an Atom, and has the same level as the atom it contains.
+         Pun intended.
+         A complex SubExpression contains a list of SubExpressions on the same level, and has a lower level than them.
+
+         SubExpressions can be evaluated.
+         */
+
+        private Atom atom = null;
+        private List<SubExpression> subExpressions;
+
+        public SubExpression(Atom atom)
+        {
+            this.atom = atom;
+        }
+        public SubExpression(List<SubExpression> subExpressions)
+        {
+            this.subExpressions = subExpressions;
+        }
+        public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
+        {
+            if (this.atom != null)
+            {
+                switch (this.atom.type)
+                {
+                    case AtomType.Variable:
+                        // the environment should only contain the in-scope variables.
+                        // the names contain the brackets around them.
+                        return environment[this.atom.content];
+                    case AtomType.String:
+                        return new EncapsulatedData(this.atom.content);
+                    case AtomType.Number:
+                        return new EncapsulatedData(Decimal.Parse(this.atom.content));
+                    default:
+                        // AtomType.FunctionCall, AtomType.Operator shouldn't happen
+                        throw new Exception("Syntax error: invalid item type.");
+                }
+            }
+            else // there are operators to handle
+            {
+                throw new NotImplementedException("Cannot handle operators.");
+            }
+        }
+    }
+    public class EncapsulatedData
+    {
+        DataType type;
+        String stringData;
+        Decimal numberData;
+        DateTime dateTimeData;
+        Boolean booleanData;
+        List<EncapsulatedData> parameterList;
+
+        public EncapsulatedData(String data)
+        {
+            type = DataType.String;
+            stringData = data;
+        }
+        public EncapsulatedData(Decimal data)
+        {
+            type = DataType.Number;
+            numberData = data;
+        }
+        public EncapsulatedData(DateTime data)
+        {
+            type = DataType.DateTime;
+            dateTimeData = data;
+        }
+        public EncapsulatedData(Boolean data)
+        {
+            type = DataType.String;
+            booleanData = data;
+        }
+        public EncapsulatedData(List<EncapsulatedData> data)
+        {
+            type = DataType.ParameterList;
+            parameterList = data;
         }
     }
 }
