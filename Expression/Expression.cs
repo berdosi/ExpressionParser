@@ -223,7 +223,6 @@ namespace Automation
                 // to SubExpressions with a functionName proprerty.
                 return Library.Evaluate(functionName, parameterList);
             }
-
             if (this.atom != null)
             {
                 return this.atom.Evaluate(environment);
@@ -298,22 +297,39 @@ namespace Automation
                     }
                 }
                 // 2.   evaluate the operators. They are on the same level, so parse them in their order of precedence.
-                //      note, the operators are just weird-looking function calls
+                //      note,
+                //      - operators are just weird-looking function calls
+                //      - if it starts with an operator 
+                //          OR there is an operator to the left and a value to the right, 
+                //          THEN it is unary (e.g. minus). 
                 throw new NotImplementedException("Cannot handle operators.");
             }
         }
     }
     public static class Library {
+        private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData>> FunctionLibrary 
+            = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData>>
+            {
+                { 
+                    "example",
+                    inputData => { return new EncapsulatedData("a"); } },
+                { 
+                    "Chr",
+                    inputData => {
+                        return new EncapsulatedData(Char.ConvertFromUtf32(Convert.ToInt32(inputData.numberData)));
+                    }
+                },
+            };
+
 		public static EncapsulatedData Evaluate(string functionName)
         {
-            throw new NotImplementedException();
+            return FunctionLibrary[functionName](null);
         }
         public static EncapsulatedData Evaluate(string functionName, EncapsulatedData parameters)
         {
             // NOTE parameters.type is not always parameterList. 
             // SubExpressions following single-parameter functions evaluate to EncapsulatedData with a different type.
-            // if the 
-            throw new NotImplementedException();
+            return FunctionLibrary[functionName](parameters);
         }
     }
     public class EncapsulatedData
