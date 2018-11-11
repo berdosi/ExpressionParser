@@ -155,6 +155,23 @@ namespace Automation
             this.content = content;
             this.type = type;
         }
+        public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
+        {
+            switch (this.type)
+            {
+                case AtomType.Variable:
+                    // the environment should only contain the in-scope variables.
+                    // the names contain the brackets around them.
+                    return environment[this.content];
+                case AtomType.String:
+                    return new EncapsulatedData(this.content);
+                case AtomType.Number:
+                    return new EncapsulatedData(Decimal.Parse(this.content));
+                default:
+                    // AtomType.FunctionCall, AtomType.Operator shouldn't happen
+                    throw new Exception("Syntax error: invalid item type.");
+            }
+        }
     }
     public class SubExpression
     {
@@ -193,6 +210,7 @@ namespace Automation
         }
         public SubExpression(string functionName, EncapsulatedData parameterList)
         {
+            // if it is initialized with a string and EncapsulatedData, it is a functioncall which was parsed.
             this.functionName = functionName;
             this.parameterList = parameterList;
         }
@@ -200,25 +218,14 @@ namespace Automation
         {
             if (this.functionName != "")
             {
+                // [functionCall] [SubExpression] sequences are converted 
+                // to SubExpressions with a functionName proprerty.
                 return Library.Evaluate(functionName, parameterList);
             }
 
             if (this.atom != null)
             {
-                switch (this.atom.type)
-                {
-                    case AtomType.Variable:
-                        // the environment should only contain the in-scope variables.
-                        // the names contain the brackets around them.
-                        return environment[this.atom.content];
-                    case AtomType.String:
-                        return new EncapsulatedData(this.atom.content);
-                    case AtomType.Number:
-                        return new EncapsulatedData(Decimal.Parse(this.atom.content));
-                    default:
-                        // AtomType.FunctionCall, AtomType.Operator shouldn't happen
-                        throw new Exception("Syntax error: invalid item type.");
-                }
+                return this.atom.Evaluate(environment);
             }
             else // there are operators and function calls to handle
             {
@@ -249,40 +256,44 @@ namespace Automation
                             //      because addition is performed first.
                             //      parentheticals, like in "1, 12 + (1 / 2)" are treated 
                             //      on their own level as  1 / 2 will be a separate subExpression
-                            if (subExpressions[i + 1].atom != null)
+                            if (i == (subExpressions.Count - 1))
                             {
-                                // function without parameters
+                                functionCallsParsed.Add(new SubExpression(currentAtom.content, null));
                             }
-                            else
+                            else if (subExpressions[i + 1].atom != null) // TODO check if there is i+1
                             {
-
+                                if (subExpressions[i + 1].atom.type != AtomType.Operator)
+                                {
+                                    functionCallsParsed.Add(
+                                        new SubExpression(currentAtom.content,
+                                        subExpressions[i + 1].atom.Evaluate(environment)));
+                                    i++; // skip the next item
+                                }
+                                else
+                                {
+                                    // if the next atom is an operator, it is a zero-argument function like random() + 1
+                                    functionCallsParsed.Add(new SubExpression(currentAtom.content, null));
+                                }
                             }
-                        }
-                        else if (atomType == AtomType.Number)
-                        {
-                            functionCallsParsed.Add(new EncapsulatedData(Decimal.Parse(currentAtom.content)));
-                        }
-                        else if (atomType == AtomType.String)
-                        {
-                            functionCallsParsed.Add(new EncapsulatedData(currentAtom.content));
-                        }
-                        else if (atomType == AtomType.Variable)
-                        {
-                            // note : environment's keys should contain 
-                            // the variable's control characters (like "$var", "[var]")
-                            functionCallsParsed.Add(environment[currentAtom.content]);
-                        }
-                        else if (atomType == AtomType.Operator)
-                        {
-
+                            else if (subExpressions[i + 1].subExpressions != null)
+                            {
+                                // TODO check if the next atom is NOT a subExpression
+                                functionCallsParsed.Add(
+                                    new SubExpression(
+                                        currentAtom.content,
+                                        subExpressions[i + 1].Evaluate(environment)));
+                                i++; // skip the next item
+                            }
+                            else throw new Exception("Unexpected token.");
                         }
                         else
                         {
+                            functionCallsParsed.Add(subExpressions[i]);
                         }
                     }
-                    else
+                    else // at this point it cannot be a functioncall expression
                     {
-
+                        functionCallsParsed.Add(subExpressions[i]);
                     }
                 }
                 // 2.   evaluate the operators. They are on the same level, so parse them in their order of precedence.
@@ -296,8 +307,11 @@ namespace Automation
         {
             throw new NotImplementedException();
         }
-        public static EncapsulatedData Evaluate(string functionName, EncapsulatedData parameterList)
+        public static EncapsulatedData Evaluate(string functionName, EncapsulatedData parameters)
         {
+            // NOTE parameters.type is not always parameterList. 
+            // SubExpressions following single-parameter functions evaluate to EncapsulatedData with a different type.
+            // if the 
             throw new NotImplementedException();
         }
     }
