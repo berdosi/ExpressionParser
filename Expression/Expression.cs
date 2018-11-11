@@ -8,13 +8,8 @@ namespace Automation
     {
         public List<Atom> Atoms { get; }
 
-        public Expression(string inputString)
+        private void parseGeneral(ref string input, ref int level, ref bool inString)
         {
-            this.Atoms = new List<Atom>();
-            string input = inputString;
-            bool inString = false;
-            int level = 0;
-            
             Regex parenOpen = new Regex(@"^\(");
             Regex parenClose = new Regex(@"^\)");
 
@@ -26,87 +21,109 @@ namespace Automation
             Regex functionCall = new Regex(@"^[a-zA-Z]+");
             Regex stringStart = new Regex("^\"");
 
+            if (whiteSpace.IsMatch(input))
+            {
+                input = input.Remove(0, whiteSpace.Match(input).Value.Length);
+            }
+            else if (parenOpen.IsMatch(input))
+            {
+                level++;
+                input = input.Remove(0, 1);
+            }
+            else if (parenClose.IsMatch(input))
+            {
+                level--;
+                input = input.Remove(0, 1);
+            }
+            else if (numeric.IsMatch(input))
+            {
+                string contentString = numeric.Match(input).Value;
+                Atom currentAtom = new Atom(AtomType.Number, contentString, level);
+                this.Atoms.Add(currentAtom);
+                input = input.Remove(0, contentString.Length);
+            }
+            else if (variable.IsMatch(input))
+            {
+                string contentString = variable.Match(input).Value;
+                Atom currentAtom = new Atom(AtomType.Variable, contentString, level);
+                this.Atoms.Add(currentAtom);
+                input = input.Remove(0, contentString.Length);
+            }
+            else if (operatorCharacter.IsMatch(input))
+            {
+                string contentString = operatorCharacter.Match(input).Value;
+                Atom currentAtom = new Atom(AtomType.Operator, contentString, level);
+                this.Atoms.Add(currentAtom);
+                input = input.Remove(0, contentString.Length);
+            }
+            else if (functionCall.IsMatch(input))
+            {
+                string contentString = functionCall.Match(input).Value;
+                Atom currentAtom = new Atom(AtomType.FunctionCall, contentString, level);
+                this.Atoms.Add(currentAtom);
+                input = input.Remove(0, contentString.Length);
+            }
+            else if (stringStart.IsMatch(input))
+            {
+                Atom currentAtom = new Atom(AtomType.String, "", level);
+                this.Atoms.Add(currentAtom);
+                input = input.Remove(0, 1);
+                inString = true;
+            }
+        }
+        private void parseInString(ref string input, ref bool inString)   
+        {
             Regex inStringDoubleQuote = new Regex("^\"\"");
             Regex inStringNoQuote = new Regex("^[^\"]+");
             Regex inStringFinalQuote = new Regex("^\"");
 
-            Regex whiteSpaceOnly = new Regex(@"^\s+$");
-            
+            if (inStringDoubleQuote.IsMatch(input))
+            {
+                var atom = Atoms[Atoms.Count -1];
+                atom.content += "\"";
+                input = input.Remove(0, 2);
+            }
+            else if (inStringNoQuote.IsMatch(input))
+            {
+                var atom = Atoms[Atoms.Count -1];
+                atom.content += inStringNoQuote.Match(input).Value;
+                input = input.Remove(0, inStringNoQuote.Match(input).Value.Length);
+            }
+            else if (inStringFinalQuote.IsMatch(input))
+            {
+                inString = false;
+                input = input.Remove(0, 1);
+            }
+
+        }
+        public Expression(string inputString)
+        {
+            this.Atoms = new List<Atom>();
+            string input = inputString;
+            bool inString = false;
+            int level = 0;
+
             // create list of Atoms
             while ((input != ""))
             {
-                if (!inString)
-                {
-                    if (whiteSpace.IsMatch(input))
-                    {
-                        input = input.Remove(0, whiteSpace.Match(input).Value.Length);
-                    }
-                    else if (parenOpen.IsMatch(input))
-                    {
-                        level++;
-                        input = input.Remove(0, 1);
-                    }
-                    else if (parenClose.IsMatch(input))
-                    {
-                        level--;
-                        input = input.Remove(0, 1);
-                    }
-                    else if (numeric.IsMatch(input))
-                    {
-                        string contentString = numeric.Match(input).Value;
-                        Atom currentAtom = new Atom(AtomType.Number, contentString, level);
-                        this.Atoms.Add(currentAtom);
-                        input = input.Remove(0, contentString.Length);
-                    }
-                    else if (variable.IsMatch(input))
-                    {
-                        string contentString = variable.Match(input).Value;
-                        Atom currentAtom = new Atom(AtomType.Variable, contentString, level);
-                        this.Atoms.Add(currentAtom);
-                        input = input.Remove(0, contentString.Length);
-                    }
-                    else if (operatorCharacter.IsMatch(input))
-                    {
-                        string contentString = operatorCharacter.Match(input).Value;
-                        Atom currentAtom = new Atom(AtomType.Operator, contentString, level);
-                        this.Atoms.Add(currentAtom);
-                        input = input.Remove(0, contentString.Length);
-                    }
-                    else if (functionCall.IsMatch(input))
-                    {
-                        string contentString = functionCall.Match(input).Value;
-                        Atom currentAtom = new Atom(AtomType.FunctionCall, contentString, level);
-                        this.Atoms.Add(currentAtom);
-                        input = input.Remove(0, contentString.Length);
-                    }
-                    else if (stringStart.IsMatch(input))
-                    {
-                        Atom currentAtom = new Atom(AtomType.String, "", level);
-                        this.Atoms.Add(currentAtom);
-                        input = input.Remove(0, 1);
-                        inString = true;
-                    }
-                }
-                else { // inString = true
-                    if (inStringDoubleQuote.IsMatch(input))
-                    {
-                        var atom = Atoms[Atoms.Count -1];
-                        atom.content += "\"";
-                        input = input.Remove(0, 2);
-                    }
-                    else if (inStringNoQuote.IsMatch(input))
-                    {
-                        var atom = Atoms[Atoms.Count -1];
-                        atom.content += inStringNoQuote.Match(input).Value;
-                        input = input.Remove(0, inStringNoQuote.Match(input).Value.Length);
-                    }
-                    else if (inStringFinalQuote.IsMatch(input))
-                    {
-                        inString = false;
-                        input = input.Remove(0, 1);
-                    }
-                }
+                if (!inString) parseGeneral(ref input, ref level, ref inString);
+                else parseInString(ref input, ref inString);
             }
+        }
+        public EncapsulatedData Evaluate() {
+            
+            // create list of SubExpressions.
+            foreach (Atom atom in Atoms)
+            {
+                List<SubExpression> SubExpressions = new List<SubExpression>();
+                SubExpressions.Add(new SubExpression(atom));
+            }
+            // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 
+            // until there is only one top-level SE left. 
+            
+            // Evaluate the top-level SubExpression (and it will evaluate its chilren)
+            
+            throw new NotImplementedException();
         }
     }
     public enum AtomType
@@ -146,13 +163,26 @@ namespace Automation
          The most atomic SubExpression only contains an Atom, and has the same level as the atom it contains.
          Pun intended.
          A complex SubExpression contains a list of SubExpressions on the same level, and has a lower level than them.
+         (e.g. in "fun(1,2,3)" 1,2,3 are on level1, and fun is on level0. 
+            1,2,3 are converted to a ParameterList on level0, 
+            then fun" is called with it.
 
          SubExpressions can be evaluated. The Expression is evaulated to the result of its SubExpressions' recursive evaluation.
          */
 
-        private Atom atom = null;
-        private List<SubExpression> subExpressions;
+        private readonly Atom atom = null;
+        private readonly List<SubExpression> subExpressions;
+        private readonly string functionName = "";
+        private readonly EncapsulatedData parameterList;
 
+        public int level
+        {
+            get
+            {
+                if (this.atom != null) return this.atom.level;
+                else return this.subExpressions[0].level - 1;
+            }
+        }
         public SubExpression(Atom atom)
         {
             this.atom = atom;
@@ -161,8 +191,18 @@ namespace Automation
         {
             this.subExpressions = subExpressions;
         }
+        public SubExpression(string functionName, EncapsulatedData parameterList)
+        {
+            this.functionName = functionName;
+            this.parameterList = parameterList;
+        }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
         {
+            if (this.functionName != "")
+            {
+                return Library.Evaluate(functionName, parameterList);
+            }
+
             if (this.atom != null)
             {
                 switch (this.atom.type)
@@ -180,23 +220,95 @@ namespace Automation
                         throw new Exception("Syntax error: invalid item type.");
                 }
             }
-            else // there are operators to handle
+            else // there are operators and function calls to handle
             {
-                throw new NotImplementedException("Cannot handle operators.");
                 // 1.   parse the funcion calls
+                List<SubExpression> functionCallsParsed = new List<SubExpression>();
+
+                for (int i = 0; i < subExpressions.Count; i++)
+                {
+                    if ((subExpressions[i].atom != null))
+                    {
+                        // if it is an atom.functionCall, replace it with a functioncall subExpression:
+                        //  if the next subexpression contains an atom, the function doesn't take parameters
+                        //  else the next subexpression evaluates to a paramlist.
+                        // TODO : with functions with only one parameter, like random(1) , 
+                        // 1 should evaluate to a ParamList containing one item.
+                        // otherwise just add it to functionCallsParsed.
+                        Atom currentAtom = subExpressions[i].atom;
+                        AtomType atomType = subExpressions[i].atom.type;
+                        if (atomType == AtomType.FunctionCall)
+                        { 
+                            // when there is a functionCall atom
+                            // it is either followed by an operator, like "random() + 1"
+                            //      - and it is a function without parameters
+                            // or it is followed by a subExpression evaluating to a parameterList, 
+                            // like in random(1, 12 + 1) + 1
+                            //      [functionCall] [subExpression -> parameterlist] [operator] [number]
+                            //      1, 12 + 1 is evaluated to a parameterlist of (1, 13),
+                            //      because addition is performed first.
+                            //      parentheticals, like in "1, 12 + (1 / 2)" are treated 
+                            //      on their own level as  1 / 2 will be a separate subExpression
+                            if (subExpressions[i + 1].atom != null)
+                            {
+                                // function without parameters
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                        else if (atomType == AtomType.Number)
+                        {
+                            functionCallsParsed.Add(new EncapsulatedData(Decimal.Parse(currentAtom.content)));
+                        }
+                        else if (atomType == AtomType.String)
+                        {
+                            functionCallsParsed.Add(new EncapsulatedData(currentAtom.content));
+                        }
+                        else if (atomType == AtomType.Variable)
+                        {
+                            // note : environment's keys should contain 
+                            // the variable's control characters (like "$var", "[var]")
+                            functionCallsParsed.Add(environment[currentAtom.content]);
+                        }
+                        else if (atomType == AtomType.Operator)
+                        {
+
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
                 // 2.   evaluate the operators. They are on the same level, so parse them in their order of precedence.
                 //      note, the operators are just weird-looking function calls
+                throw new NotImplementedException("Cannot handle operators.");
             }
+        }
+    }
+    public static class Library {
+		public static EncapsulatedData Evaluate(string functionName)
+        {
+            throw new NotImplementedException();
+        }
+        public static EncapsulatedData Evaluate(string functionName, EncapsulatedData parameterList)
+        {
+            throw new NotImplementedException();
         }
     }
     public class EncapsulatedData
     {
-        DataType type;
-        String stringData;
-        Decimal numberData;
-        DateTime dateTimeData;
-        Boolean booleanData;
-        List<EncapsulatedData> parameterList;
+        public DataType type { get; }
+        public String stringData { get; }
+        public Decimal numberData { get; }
+        public DateTime dateTimeData { get; }
+        public Boolean booleanData { get; }
+        public List<EncapsulatedData> parameterList { get; }
 
         public EncapsulatedData(String data)
         {

@@ -1,0 +1,14 @@
+﻿<Properties StartupConfiguration="{8635AD22-9DBB-4BEF-B209-199E07482956}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Expression/Expression.cs">
+    <Files>
+      <File FileName="Expression/Expression.cs" Line="113" Column="45" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.ItemProperties.Expression.Tests PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+</Properties>
