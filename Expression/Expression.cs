@@ -307,6 +307,125 @@ namespace Automation
         }
     }
     public static class Library {
+        private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> Operators
+            = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>>
+            {
+                {   "NOT", 
+                    (first, second) => { // first can be NULL. The **second** parameter is negated.
+                        if (second.type == DataType.Boolean)
+                            return new EncapsulatedData(!second.booleanData);
+                        throw new NotImplementedException(String.Format("Cannot negate '{0}'.", second));
+                    }
+                },
+                {   "UnaryMinus", 
+                    (first, second) => { // first can be NULL. The **second** parameter is negated.
+                        if (second.type == DataType.Number)
+                            return new EncapsulatedData(- second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot negate '{0}'.", second));
+                    }
+                },
+                {   "/", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData / second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot divide '{0}' with '{1}'.", first, second));
+                    }
+                },
+                {   "*", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData * second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot multiply '{0}' with '{1}'.", first, second));
+                    }
+                },
+                {   "+", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData + second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot add '{0}' and '{1}'.", first, second));
+                    }
+                },
+                {   "+", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData + second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot add '{0}' and '{1}'.", first, second));
+                    }
+                },
+                {   "-", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "<=", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   ">=", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "<", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   ">", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData > second.numberData);
+                        // TODO implement for dates
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "=", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData == second.numberData);
+                        if ((first.type == DataType.Boolean) && (second.type == DataType.Boolean))
+                            return new EncapsulatedData(first.booleanData == second.booleanData);
+                        if ((first.type == DataType.DateTime) && (second.type == DataType.DateTime))
+                            return new EncapsulatedData(first.dateTimeData == second.dateTimeData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "AND", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "OR", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "XOR", 
+                    (first, second) => {
+                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
+                            return new EncapsulatedData(first.numberData - second.numberData);
+                        throw new NotImplementedException(String.Format("Cannot substract '{1}' from '{0}'.", first, second));
+                    }
+                },
+                {   "&", 
+                    (first, second) => {
+                        return new EncapsulatedData(first.ToString() + second.ToString());
+                    }
+                },
+            };
         private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData>> FunctionLibrary 
             = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData>>
             {
@@ -367,6 +486,26 @@ namespace Automation
             parameterList = data;
         }
 
+        public override string ToString()
+        {
+            Dictionary<DataType, Func<string>> rendererLookup = new Dictionary<DataType, Func<string>>
+            {
+                { DataType.Boolean,         () => booleanData.ToString() },
+                { DataType.Date,            () => dateTimeData.ToString() },
+                { DataType.DateTime,        () => dateTimeData.ToString() },
+                { DataType.Number,          () => numberData.ToString() },
+                { DataType.ParameterList,   () => parameterList.ToString() },
+                { DataType.String,          () => stringData },
+            };
+            try
+            {
+                return rendererLookup[this.type]();
+            }
+            catch
+            {
+                return "Cannot render value as a string.";
+            }
+        }
         public override bool Equals(object obj)
         {            
             if (obj == null || GetType() != obj.GetType())
