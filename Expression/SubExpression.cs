@@ -10,7 +10,7 @@ namespace Automation
          The most atomic SubExpression only contains an Atom, and has the same level as the atom it contains.
          Pun intended.
          A complex SubExpression contains a list of SubExpressions on the same level, and has a lower level than them.
-         (e.g. in "fun(1,2,3)" 1,2,3 are on level1, and fun is on level0. 
+         (e.g. in "fun(1,2,3)" 1,2,3 are on level1, and fun is functioncall atom on level0. 
             1,2,3 are converted to a ParameterList on level0, 
             then fun" is called with it.
 
@@ -48,7 +48,7 @@ namespace Automation
         {
             if (this.functionName != "")
             {
-                // [functionCall] [SubExpression] sequences are converted 
+                // [subexpression[atom.functionCall]] [SubExpression] sequences are converted 
                 // to SubExpressions with a functionName proprerty.
                 return Library.Evaluate(functionName, parameterList);
             }
@@ -87,6 +87,8 @@ namespace Automation
                             //      on their own level as  1 / 2 will be a separate subExpression
                             if (i == (subExpressions.Count - 1))
                             {
+                                // this is the case when a zero parameter function closes the subexpression: 
+                                // 1 + random()
                                 functionCallsParsed.Add(new SubExpression(currentAtom.content, null));
                             }
                             else if (subExpressions[i + 1].atom != null) // TODO check if there is i+1
@@ -131,6 +133,20 @@ namespace Automation
                 //      - if it starts with an operator 
                 //          OR there is an operator to the left and a value to the right, 
                 //          THEN it is unary (e.g. minus). 
+                
+                // 2.1. handle unary operators
+                List<SubExpression> unaryOperatorsParsed = new List<SubExpression>();
+                // while 
+                //          there is an operator followed by an evaluable atom or subexpression
+                //          AND preceded by another operator, 
+                //      OR there is an operator at the start, 
+                // treat it like an unary operator (replace it in the sequence with its evaluated value)
+
+                // 2.2. Handle binary operators
+                // for each operator in order of precedence
+                // while there is an operator between two evaluables
+                // replace them with their evaluated value
+
                 throw new NotImplementedException("Cannot handle operators.");
             }
         }
