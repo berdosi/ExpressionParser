@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Automation
 {
 	public static class Library {
-        private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData>> UnaryOperators
+        public static Dictionary<string, Func<EncapsulatedData, EncapsulatedData>> UnaryOperators
             = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData>>
             {
                 {   "NOT", 
@@ -22,7 +22,7 @@ namespace Automation
                     }
                 },
             };
-        private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> Operators
+        public static Dictionary<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> Operators
             = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>>
             {
                 {   "/", 

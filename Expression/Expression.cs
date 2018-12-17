@@ -18,7 +18,7 @@ namespace Automation
 
             Regex numeric = new Regex(@"^[0-9\\\.]+");
             Regex variable = new Regex(@"^\[[^\]]+\]");
-            Regex operatorCharacter = new Regex(@"^[+\-*/&,]");
+            Regex operatorCharacter = new Regex(@"^[+\-*/&,]|AND |OR |XOR |NOT |>=|<=|<|>|=");
             Regex functionCall = new Regex(@"^[a-zA-Z]+");
             Regex stringStart = new Regex("^\"");
 
@@ -111,20 +111,20 @@ namespace Automation
                 else parseInString(ref input, ref inString);
             }
         }
-        public EncapsulatedData Evaluate() {
-            
+        public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment) {
+
             // create list of SubExpressions.
+            List<SubExpression> SubExpressions = new List<SubExpression>();
             foreach (Atom atom in Atoms)
             {
-                List<SubExpression> SubExpressions = new List<SubExpression>();
                 SubExpressions.Add(new SubExpression(atom));
             }
             // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 
             // until there is only one top-level SE left. 
-            
+
+            // Create a SubExpression and evaluate it.
             // Evaluate the top-level SubExpression (and it will evaluate its chilren)
-            
-            throw new NotImplementedException();
+            return new SubExpression(SubExpressions).Evaluate(environment);
         }
     }
 }
