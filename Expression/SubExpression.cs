@@ -37,7 +37,7 @@ namespace Automation
         {
             get
             {
-                return IsAtom
+                return (IsAtom && (atom.type != AtomType.Operator))
                     || IsFunctionCall
                     || subExpressions != null
                     || EvaluatedValue != null;
@@ -99,44 +99,7 @@ namespace Automation
                 //          THEN it is unary (e.g. minus).
 
                 // 2.1. handle unary operators
-                LinkedList<SubExpression> unaryOperatorsParsed = new LinkedList<SubExpression>();
-                // while
-                //          there is an operator followed by an evaluable atom or subexpression
-                //          AND preceded by another operator,
-                //      OR there is an operator at the start,
-                // treat it like an unary operator (replace it in the sequence with its evaluated value)
-                for (int i = functionCallsParsed.Count - 1; i >= 0; i--)
-                {
-                    if (i > 1) {
-                        if (functionCallsParsed[i].IsEvaluable)
-                        {
-                            if (functionCallsParsed[i - 1].IsOperator)
-                            {
-                                if ((i == 1) || functionCallsParsed[i - 2].IsOperator)
-                                {
-                                    unaryOperatorsParsed.AddFirst(
-                                        new SubExpression(
-                                            Library.UnaryOperators[
-                                                functionCallsParsed[i - 1].atom.content](
-                                                functionCallsParsed[i].Evaluate(environment))));
-                                    i = i - 1;
-                                }
-                            }
-                            else
-                            {
-                                if (i == 0)
-                                {
-                                    unaryOperatorsParsed.AddFirst(functionCallsParsed[i]);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            unaryOperatorsParsed.AddFirst(functionCallsParsed[i]);
-                        }
-                    }
-
-                }
+                LinkedList<SubExpression> unaryOperatorsParsed = ParseUnaryOperators(functionCallsParsed, environment);
 
                 // 2.2. Handle binary operators
                 LinkedList<SubExpression> binaryOperatorsParsed = new LinkedList<SubExpression>();
@@ -219,6 +182,81 @@ namespace Automation
                 }
             }
             return functionCallsParsed;
+        }
+        private LinkedList<SubExpression> ParseUnaryOperators(List<SubExpression> functionCallsParsed, Dictionary<string, EncapsulatedData> environment)
+        {
+            LinkedList<SubExpression> unaryOperatorsParsed = new LinkedList<SubExpression>();
+
+            // while
+            //          there is an operator followed by an evaluable atom or subexpression
+            //          AND preceded by another operator,
+            //      OR there is an operator at the start,
+            // treat it like an unary operator (replace it in the sequence with its evaluated value)
+
+            for (int i = functionCallsParsed.Count - 1; i >= 0; i--)
+            {
+                if (i > 1) {
+                    if (functionCallsParsed[i].IsEvaluable)
+                    {
+                        if (functionCallsParsed[i - 1].IsOperator)
+                        {
+                            if (functionCallsParsed[i - 2].IsOperator)
+                            { // Operator1 Operator2 Evaluable --> Operator1 Evaluated
+                                unaryOperatorsParsed.AddFirst(
+                                    new SubExpression(
+                                        Library.UnaryOperators[
+                                            functionCallsParsed[i - 1].atom.content](
+                                            functionCallsParsed[i].Evaluate(environment))));
+                                i = i - 1;
+                            }
+                            else // Evaluable Operator Evaluable --> Evaluable Operator Evaluated
+                            {
+                                unaryOperatorsParsed.AddFirst(
+                                    new SubExpression(
+                                        functionCallsParsed[i].Evaluate(environment)));
+                            }
+                        }
+                        else // TODO check. two evaluables after each other may be an error.
+                        {
+                            unaryOperatorsParsed.AddFirst(
+                                new SubExpression(
+                                    functionCallsParsed[i].Evaluate(environment)));
+                        }
+                    }
+                    else // if it is an Operator, leave it alone.
+                    {
+                        unaryOperatorsParsed.AddFirst(functionCallsParsed[i]);
+                    }
+                }
+                else if (i == 1)
+                {
+                    if (functionCallsParsed[i].IsEvaluable)
+                    {
+                        if (functionCallsParsed[i - 1].IsOperator)
+                        {
+                            unaryOperatorsParsed.AddFirst(
+                                new SubExpression(
+                                    Library.UnaryOperators[
+                                        functionCallsParsed[i - 1].atom.content](
+                                        functionCallsParsed[i].Evaluate(environment))));
+                            i = i - 1;
+                        }
+                        else // TODO : check: two evaluables after each other
+                        {
+                            unaryOperatorsParsed.AddFirst(
+                                new SubExpression(
+                                    functionCallsParsed[i].Evaluate(environment)));
+                        }
+                    }
+                }
+                else // i == 0
+                {
+                    unaryOperatorsParsed.AddFirst(
+                        new SubExpression(
+                            functionCallsParsed[i].Evaluate(environment)));   
+                }
+            }
+            return unaryOperatorsParsed;
         }
     }
 }
