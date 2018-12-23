@@ -102,12 +102,11 @@ namespace Automation
                 LinkedList<SubExpression> unaryOperatorsParsed = ParseUnaryOperators(functionCallsParsed, environment);
 
                 // 2.2. Handle binary operators
-                LinkedList<SubExpression> binaryOperatorsParsed = new LinkedList<SubExpression>();
+                SubExpression binaryOperatorsParsed = ParseBinaryOperators(unaryOperatorsParsed, environment);
                 // for each operator in order of precedence
                 // while there is an operator between two evaluables
                 // replace them with their evaluated value
-
-                throw new NotImplementedException("Cannot handle operators.");
+                return binaryOperatorsParsed.EvaluatedValue;
             }
         }
 
@@ -257,6 +256,14 @@ namespace Automation
                 }
             }
             return unaryOperatorsParsed;
+        }
+        private SubExpression ParseBinaryOperators(LinkedList<SubExpression> unaryOperatorsParsed, Dictionary<string, EncapsulatedData> environment)
+        {
+                // for each operator in order of precedence
+                // while there is an operator between two evaluables
+                // replace them with their evaluated value
+
+            throw new NotImplementedException("Cannot handle binary operators.");
         }
     }
 }
