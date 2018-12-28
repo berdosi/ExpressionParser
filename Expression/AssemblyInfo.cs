@@ -1,0 +1,1 @@
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Expression.Tests")] // https://stackoverflow.com/a/41462971/8515485

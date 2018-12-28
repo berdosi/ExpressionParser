@@ -1,5 +1,7 @@
 ﻿using Xunit;
 using Automation;
+using System;
+using System.Collections.Generic;
 
 namespace Automation.UnitTests
 {
@@ -69,6 +71,31 @@ namespace Automation.UnitTests
 		public Expression_ASTElements_Tests()
 		{
 
+		}
+	}
+	public class Expression_FuncionParser_Tests
+	{
+		public Expression_FuncionParser_Tests()
+		{
+
+		}
+		[Fact]
+		public void testInternals()
+		{
+			string location = "";
+			//_expression = new Automation.Expression("[variable]");
+			try {
+				location = "initializes with an encapsulated data item";
+				SubExpression subExpression = new SubExpression(new EncapsulatedData("example string"));
+				location = "can parse unaries";
+				LinkedList<SubExpression> unaryParsed = subExpression.ParseUnaryOperators(new List<SubExpression>(), new Dictionary<string, EncapsulatedData>());
+
+				Assert.True(true, "Didn't fail with empties. ");
+			}
+			catch (Exception e)
+			{
+				Assert.True(false, String.Format("Fails with empties {1} {0}", (e != null) ? e.Message : "", location));
+			}
 		}
 	}
 }

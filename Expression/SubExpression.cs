@@ -110,7 +110,7 @@ namespace Automation
             }
         }
 
-        private List<SubExpression> ParseFunctionCalls(Dictionary<string, EncapsulatedData> environment)
+        internal List<SubExpression> ParseFunctionCalls(Dictionary<string, EncapsulatedData> environment)
         {
             List<SubExpression> functionCallsParsed = new List<SubExpression>();
 
@@ -182,7 +182,7 @@ namespace Automation
             }
             return functionCallsParsed;
         }
-        private LinkedList<SubExpression> ParseUnaryOperators(List<SubExpression> functionCallsParsed, Dictionary<string, EncapsulatedData> environment)
+        internal LinkedList<SubExpression> ParseUnaryOperators(List<SubExpression> functionCallsParsed, Dictionary<string, EncapsulatedData> environment)
         {
             LinkedList<SubExpression> unaryOperatorsParsed = new LinkedList<SubExpression>();
 
@@ -257,7 +257,7 @@ namespace Automation
             }
             return unaryOperatorsParsed;
         }
-        private SubExpression ParseBinaryOperators(LinkedList<SubExpression> unaryOperatorsParsed, Dictionary<string, EncapsulatedData> environment)
+        internal SubExpression ParseBinaryOperators(LinkedList<SubExpression> unaryOperatorsParsed, Dictionary<string, EncapsulatedData> environment)
         {
                 // for each operator in order of precedence
                 // while there is an operator between two evaluables
