@@ -262,6 +262,13 @@ namespace Automation
                 // for each operator in order of precedence
                 // while there is an operator between two evaluables
                 // replace them with their evaluated value
+                foreach (KeyValuePair<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> operatorEntry in Library.Operators)
+                {
+                    for (int i = unaryOperatorsParsed.Count - 1; i >= 0; i--)
+                    {
+                        // if it is Evaluable Operator Evaluable, replace it with evaluated
+                    }
+                }
 
             throw new NotImplementedException("Cannot handle binary operators.");
         }
