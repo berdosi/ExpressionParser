@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 using Automation;
 using System;
 using System.Collections.Generic;
@@ -22,7 +22,7 @@ namespace Automation.UnitTests
 			try
 			{
 				Expression _expression = new Expression(testExpressionString1);
-				Assert.True(true, "Object is initialized for " +testExpressionString1);
+				Assert.True(true, "Object is initialized for " + testExpressionString1);
 			}
 			catch (System.Exception ex)
 			{
@@ -84,7 +84,8 @@ namespace Automation.UnitTests
 		{
 			string location = "";
 			//_expression = new Automation.Expression("[variable]");
-			try {
+			try
+			{
 				location = "initializes with an encapsulated data item";
 				SubExpression subExpression = new SubExpression(new EncapsulatedData("example string"));
 				location = "can parse unaries";
