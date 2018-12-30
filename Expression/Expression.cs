@@ -119,9 +119,10 @@ namespace Automation
             {
                 SubExpressions.Add(new SubExpression(atom));
             }
+            // TODO
             // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 
             // until there is only one top-level SE left. 
-
+            throw new NotImplementedException("grouping atoms on the same level into subexpressions is not implemented yet.");
             // Create a SubExpression and evaluate it.
             // Evaluate the top-level SubExpression (and it will evaluate its chilren)
             return new SubExpression(SubExpressions).Evaluate(environment);
