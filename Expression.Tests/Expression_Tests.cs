@@ -99,4 +99,27 @@ namespace Automation.UnitTests
 			}
 		}
 	}
+	public class Expression_Evaluation_Tests
+	{
+		private string testExpressionString1 = "1 + 1";
+		private readonly Expression testExpression1;
+
+		public Expression_Evaluation_Tests()
+		{
+			testExpression1 = new Expression(testExpressionString1);
+		}
+		[Fact]
+		public void canBeEvaluated()
+		{
+			try
+			{
+				testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>());
+				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", testExpressionString1));
+			}
+			catch
+			{
+				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", testExpressionString1));
+			}
+		}
+	}
 }
