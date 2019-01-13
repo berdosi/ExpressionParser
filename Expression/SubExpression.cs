@@ -121,7 +121,7 @@ namespace Automation
                     // if it is an atom.functionCall, replace it with a functioncall subExpression:
                     //  if the next subexpression contains an atom, the function doesn't take parameters
                     //  else the next subexpression evaluates to a paramlist.
-                    // TODO : with functions with only one parameter, like random(1) ,
+                    // TODO (DONE): with functions with only one parameter, like random(1) ,
                     // 1 should evaluate to a ParamList containing one item.
                     // otherwise just add it to functionCallsParsed.
                     Atom currentAtom = subExpressions[i].atom;
@@ -146,6 +146,7 @@ namespace Automation
                         }
                         else if (subExpressions[i + 1].atom != null) // TODO check if there is i+1
                         {
+                            // TODO NOTE it should be IsEvaluable instead.
                             if (subExpressions[i + 1].atom.type != AtomType.Operator)
                             {
                                 functionCallsParsed.Add(
@@ -259,16 +260,36 @@ namespace Automation
         }
         internal SubExpression ParseBinaryOperators(LinkedList<SubExpression> unaryOperatorsParsed, Dictionary<string, EncapsulatedData> environment)
         {
-                // for each operator in order of precedence
-                // while there is an operator between two evaluables
-                // replace them with their evaluated value
-                foreach (KeyValuePair<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> operatorEntry in Library.Operators)
+
+            // for each operator in order of precedence
+            // while there is an operator between two evaluables
+            // replace them with their evaluated value
+            LinkedList<SubExpression> ParsingOperator = unaryOperatorsParsed;
+            LinkedList<SubExpression> ParsedOperator = new LinkedList<SubExpression>();
+            foreach (KeyValuePair<string, Func<EncapsulatedData, EncapsulatedData, EncapsulatedData>> operatorEntry in Library.Operators)
+            {
+                SubExpression BeforeCurrent = null;
+                SubExpression BeforeBeforeCurrent = null;
+                foreach (SubExpression Current in ParsingOperator)
                 {
-                    for (int i = unaryOperatorsParsed.Count - 1; i >= 0; i--)
+                    // if it is Evaluable Operator Evaluable, replace it with evaluated
+                    if (BeforeCurrent == null)
                     {
-                        // if it is Evaluable Operator Evaluable, replace it with evaluated
+                        BeforeCurrent = Current;
+                    }
+                    else if (BeforeBeforeCurrent == null)
+                    {
+                        BeforeBeforeCurrent = BeforeCurrent;
+                        BeforeCurrent = Current;
+                        // TODO process the pattern here.
+                    }
+                    else
+                    {
+                        ParsedOperator.AddFirst(Current); //
                     }
                 }
+                ParsingOperator = ParsedOperator; // save the current evaluation state 
+            }
 
             throw new NotImplementedException("Cannot handle binary operators.");
         }
