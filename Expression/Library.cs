@@ -46,13 +46,6 @@ namespace Automation
                         throw new NotImplementedException(String.Format("Cannot add '{0}' and '{1}'.", first, second));
                     }
                 },
-                {   "+", 
-                    (first, second) => {
-                        if ((first.type == DataType.Number) && (second.type == DataType.Number))
-                            return new EncapsulatedData(first.numberData + second.numberData);
-                        throw new NotImplementedException(String.Format("Cannot add '{0}' and '{1}'.", first, second));
-                    }
-                },
                 {   "-", 
                     (first, second) => {
                         if ((first.type == DataType.Number) && (second.type == DataType.Number))
