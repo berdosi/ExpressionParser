@@ -116,8 +116,10 @@ namespace Automation.UnitTests
 				testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>());
 				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", testExpressionString1));
 			}
-			catch
+			catch (Exception e)
 			{
+				Console.WriteLine("--->" + e.Message);
+
 				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", testExpressionString1));
 			}
 		}

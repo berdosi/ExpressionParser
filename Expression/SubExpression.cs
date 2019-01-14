@@ -76,6 +76,7 @@ namespace Automation
         }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
         {
+            Console.WriteLine(ToString());
             if (EvaluatedValue != null) return EvaluatedValue;
             if (this.functionName != "")
             {
@@ -295,17 +296,30 @@ namespace Automation
                     {
                         BeforeBeforeCurrent = BeforeCurrent;
                         BeforeCurrent = Current;
-                        // TODO process the pattern here.
+                        // process the Evaluable Operator Evaluable pattern here.
+                        if ((BeforeCurrent.IsOperator) && (BeforeCurrent.atom.content == operatorEntry.Key))
+                        {
+                            BeforeBeforeCurrent = new SubExpression(
+                                    operatorEntry.Value(
+                                        BeforeBeforeCurrent.EvaluatedValue,
+                                        Current.EvaluatedValue));
+                            BeforeCurrent = null;
+                        }
                     }
                     else
                     {
-                        ParsedOperator.AddFirst(Current); //
+                        ParsedOperator.AddLast(new SubExpression(
+                                    operatorEntry.Value(
+                                        BeforeBeforeCurrent.EvaluatedValue,
+                                        Current.EvaluatedValue)));
+                        BeforeBeforeCurrent = null;
+                        BeforeCurrent = null;
                     }
                 }
                 ParsingOperator = ParsedOperator; // save the current evaluation state 
             }
-
-            throw new NotImplementedException("Cannot handle binary operators.");
+            return new SubExpression(ParsedOperator.First.Value.EvaluatedValue);
+            //throw new NotImplementedException("Cannot handle binary operators.");
         }
     }
 }

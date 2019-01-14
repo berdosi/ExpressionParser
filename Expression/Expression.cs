@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
@@ -120,17 +120,19 @@ namespace Automation
             return retValue.ToString();
         }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment) {
-
+            Console.WriteLine(ToString());
             // create list of SubExpressions.
             List<SubExpression> SubExpressions = new List<SubExpression>();
             foreach (Atom atom in Atoms)
             {
                 SubExpressions.Add(new SubExpression(atom));
+                Console.WriteLine(atom.ToString());
+                Console.WriteLine((new SubExpression(atom)).ToString());
             }
             // TODO
             // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 
             // until there is only one top-level SE left. 
-            throw new NotImplementedException("grouping atoms on the same level into subexpressions is not implemented yet.");
+            //throw new NotImplementedException("grouping atoms on the same level into subexpressions is not implemented yet.");
             // Create a SubExpression and evaluate it.
             // Evaluate the top-level SubExpression (and it will evaluate its chilren)
             return new SubExpression(SubExpressions).Evaluate(environment);
