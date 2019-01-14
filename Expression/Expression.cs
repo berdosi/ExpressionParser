@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -110,6 +111,13 @@ namespace Automation
                 if (!inString) parseGeneral(ref input, ref level, ref inString);
                 else parseInString(ref input, ref inString);
             }
+        }
+        public override string ToString()
+        {
+            StringBuilder retValue = new StringBuilder("(Expression: ");
+            foreach (Atom atom in Atoms) retValue.Append(atom.ToString());
+            retValue.Append(")");
+            return retValue.ToString();
         }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment) {
 

@@ -15,6 +15,10 @@ namespace Automation
             this.content = content;
             this.type = type;
         }
+        public override string ToString()
+        {
+            return String.Format("(Atom<{0}@{2}> {1})", type, content, level);
+        }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
         {
             switch (this.type)
