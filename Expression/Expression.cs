@@ -120,14 +120,11 @@ namespace Automation
             return retValue.ToString();
         }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment) {
-            Console.WriteLine(ToString());
             // create list of SubExpressions.
             List<SubExpression> SubExpressions = new List<SubExpression>();
             foreach (Atom atom in Atoms)
             {
                 SubExpressions.Add(new SubExpression(atom));
-                Console.WriteLine(atom.ToString());
-                Console.WriteLine((new SubExpression(atom)).ToString());
             }
             // TODO
             // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 

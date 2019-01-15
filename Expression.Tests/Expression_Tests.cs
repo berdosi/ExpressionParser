@@ -83,7 +83,6 @@ namespace Automation.UnitTests
 		public void testInternals()
 		{
 			string location = "";
-			//_expression = new Automation.Expression("[variable]");
 			try
 			{
 				location = "initializes with an encapsulated data item";
@@ -101,6 +100,7 @@ namespace Automation.UnitTests
 	}
 	public class Expression_Evaluation_Tests
 	{
+		private Dictionary<string, EncapsulatedData> emptyEnvironment = new Dictionary<string, EncapsulatedData>();
 		public Expression_Evaluation_Tests()
 		{
 		}
@@ -111,15 +111,31 @@ namespace Automation.UnitTests
 			Expression testExpression1 = new Expression(testExpressionString1);
 			try
 			{
-				EncapsulatedData result = testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>()); 
-				Console.WriteLine(result);
+				EncapsulatedData result = testExpression1.Evaluate(emptyEnvironment); 
 				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", testExpressionString1));
 				Assert.True(result.Equals(new EncapsulatedData((Decimal)2)), String.Format("Equals 2.", testExpressionString1));
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("--->" + e.Message);
-
+				Assert.True(
+					false,
+					String.Format(
+						"Evaluating valid expression '{0}' should not throw. ({1})",
+						testExpressionString1,
+						e.Message));
+			}
+		}
+		public void canCombine()
+		{
+			string testExpressionString1 = "2 * 3 + 1 + 4/2";
+			Expression testExpression1 = new Expression(testExpressionString1);
+			try
+			{
+				EncapsulatedData result = testExpression1.Evaluate(emptyEnvironment); 
+				Assert.True(result.Equals(new EncapsulatedData((Decimal)9)), String.Format("Equals 7.", testExpressionString1));
+			}
+			catch (Exception e)
+			{
 				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", testExpressionString1));
 			}
 		}
@@ -129,18 +145,44 @@ namespace Automation.UnitTests
 			Expression testExpression1 = new Expression("1");
 			try
 			{
-				EncapsulatedData retValue = testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>());
-				if (retValue != null)				Console.WriteLine(retValue.ToString());
-				else Console.WriteLine("nullvalue");
+				EncapsulatedData retValue = testExpression1.Evaluate(emptyEnvironment);
+				//if (retValue != null)				Console.WriteLine(retValue.ToString());
+				//else Console.WriteLine("nullvalue");
 				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", "1"));
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine("--->" + e.Message);
-
+				//Console.WriteLine("--->" + e.Message);
 				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", "1"));
 			}
-
 		}
+		[Fact]
+		public void evaluateUnaries()
+		{
+			Assert.Equal((new Expression("-1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(-1)));
+			Assert.Equal((new Expression("--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(1)));
+			Assert.Equal((new Expression("---1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(-1)));
+		}
+	}
+	public class Environment_Tests
+	{
+		private Dictionary<string, EncapsulatedData> environment = new Dictionary<string, EncapsulatedData>(){
+			{ "[one]", new EncapsulatedData((Decimal)1) },
+			{ "[just a string]", new EncapsulatedData("test string") },
+		};
+		public Environment_Tests()
+		{
+		}
+		[Fact]
+		public void simpleEvalNumbers()
+		{
+			Assert.Equal((new Expression("[one]")).Evaluate(environment), new EncapsulatedData((Decimal)1));
+			Assert.Equal((new Expression("[one]+[one]")).Evaluate(environment), new EncapsulatedData((Decimal)2));
+		}
+		[Fact]
+		public void simpleEvalStrings()
+		{
+			Assert.Equal((new Expression("[just a string]")).Evaluate(environment), new EncapsulatedData("test string"));
+		}		
 	}
 }

@@ -270,15 +270,51 @@ namespace Automation
 					}
 					else
 					{
-						unaryOperatorsParsed.AddFirst(
-											functionCallsParsed[i]);
+						if (functionCallsParsed[i - 1].IsOperator && functionCallsParsed[i].IsOperator)
+						{
+							unaryOperatorsParsed.First.Value =
+									new SubExpression(
+											Library.UnaryOperators[
+													functionCallsParsed[i].atom.content](
+													unaryOperatorsParsed.First.Value.Evaluate(environment)));
+						}
+						else
+						{
+							unaryOperatorsParsed.AddFirst(
+									functionCallsParsed[i]);
+						}
 					}
 				}
 				else // i == 0
 				{
-					unaryOperatorsParsed.AddFirst(
-							new SubExpression(
-									functionCallsParsed[i].Evaluate(environment)));
+					if (functionCallsParsed[i].IsOperator)
+					{
+						if (unaryOperatorsParsed.First.Value.IsEvaluable)
+						{
+							unaryOperatorsParsed.First.Value =
+									new SubExpression(
+											Library.UnaryOperators[
+													functionCallsParsed[i].atom.content](
+													unaryOperatorsParsed.First.Value.Evaluate(environment)));
+						}
+						else
+						{
+							throw new Exception("parse error.");
+						}
+					}
+					else
+					{
+						if (functionCallsParsed[i].IsEvaluable)
+						{
+							unaryOperatorsParsed.AddFirst(
+									new SubExpression(
+														functionCallsParsed[i].Evaluate(environment)));
+						}
+						else
+						{
+							throw new Exception("parse error.");
+						}
+					}
 				}
 			}
 			return unaryOperatorsParsed;
@@ -294,16 +330,13 @@ namespace Automation
 				SubExpression Current = null;
 				SubExpression BeforeCurrent = null;
 				SubExpression BeforeBeforeCurrent = null;
-        SubExpression[] ParsedOperator = { };
+				SubExpression[] ParsedOperator = { };
 				for (int i = 0, j = 0; i < ParsingOperator.Length; i++, j++)
 				{
-                    Console.WriteLine(String.Format("{0} {1}", i, j));
 					Current = ParsingOperator[i];
 					// process the Evaluable Operator Evaluable pattern here.
 					if ((BeforeCurrent != null) && (BeforeCurrent.IsOperator) && (BeforeCurrent.atom?.content == operatorEntry.Key))
 					{
-						Console.WriteLine(String.Format("if{0}", operatorEntry.Key));
-
 						ParsedOperator = ParsedOperator.Take(ParsedOperator.Count() - 2).ToArray(); // remove the last two elements
 						BeforeCurrent = new SubExpression(
 										operatorEntry.Value(
@@ -313,7 +346,6 @@ namespace Automation
 						Array.Resize(ref ParsedOperator, j + 1);
 						ParsedOperator[j] = BeforeCurrent;
 						BeforeBeforeCurrent = null;
-						Console.WriteLine(String.Format("{0} {1}", j, BeforeCurrent.ToString()));
 					}
 					else
 					{
