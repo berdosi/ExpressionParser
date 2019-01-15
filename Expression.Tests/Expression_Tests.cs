@@ -33,9 +33,9 @@ namespace Automation.UnitTests
 		[Fact]
 		public void atomsDetected()
 		{
-				Assert.True(5 == testExpression1.Atoms.Count, testExpressionString1 + ": There are 5 atoms.");
+			Assert.True(5 == testExpression1.Atoms.Count, testExpressionString1 + ": There are 5 atoms.");
 		}
-		
+
 		[Fact]
 		public void atomTypesCorrect()
 		{
@@ -55,7 +55,7 @@ namespace Automation.UnitTests
 			Assert.True(testExpression1.Atoms[3].level == 1, "4th atom's level is 1.");
 			Assert.True(testExpression1.Atoms[4].level == 1, "5th atom's level is 1.");
 		}
-		
+
 		[Fact]
 		public void contentStringsCorrect()
 		{
@@ -101,20 +101,20 @@ namespace Automation.UnitTests
 	}
 	public class Expression_Evaluation_Tests
 	{
-		private string testExpressionString1 = "1 + 1";
-		private readonly Expression testExpression1;
-
 		public Expression_Evaluation_Tests()
 		{
-			testExpression1 = new Expression(testExpressionString1);
 		}
 		[Fact]
-		public void canBeEvaluated()
+		public void canAddTwoNumbers()
 		{
+			string testExpressionString1 = "1 + 1";
+			Expression testExpression1 = new Expression(testExpressionString1);
 			try
 			{
-				testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>());
+				EncapsulatedData result = testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>()); 
+				Console.WriteLine(result);
 				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", testExpressionString1));
+				Assert.True(result.Equals(new EncapsulatedData((Decimal)2)), String.Format("Equals 2.", testExpressionString1));
 			}
 			catch (Exception e)
 			{
@@ -122,6 +122,25 @@ namespace Automation.UnitTests
 
 				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", testExpressionString1));
 			}
+		}
+		[Fact]
+		public void evaluatesSimple()
+		{
+			Expression testExpression1 = new Expression("1");
+			try
+			{
+				EncapsulatedData retValue = testExpression1.Evaluate(new Dictionary<string, EncapsulatedData>());
+				if (retValue != null)				Console.WriteLine(retValue.ToString());
+				else Console.WriteLine("nullvalue");
+				Assert.True(true, String.Format("Valid expression '{0}' is evaluated.", "1"));
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine("--->" + e.Message);
+
+				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", "1"));
+			}
+
 		}
 	}
 }
