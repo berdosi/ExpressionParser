@@ -163,6 +163,13 @@ namespace Automation.UnitTests
 			Assert.Equal((new Expression("--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(1)));
 			Assert.Equal((new Expression("---1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(-1)));
 		}
+		[Fact]
+		public void evaluateCombinedUnaryBinary()
+		{
+			Assert.Equal((new Expression("1--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(2)));
+			Assert.Equal((new Expression("1---1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(0)));
+			//Assert.Equal((new Expression("1/--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(1)));
+		}
 	}
 	public class Environment_Tests
 	{
