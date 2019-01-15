@@ -75,6 +75,21 @@ namespace Automation
 		{
 			this.EvaluatedValue = Evaluated;
 		}
+		public override string ToString()
+		{
+			if (IsAtom) return String.Format("(atom: {0})", atom.ToString());
+			if (IsFunctionCall) return String.Format("(functionCall: {0}({1}))", functionName, parameterList.ToString());
+			if (EvaluatedValue != null) return EvaluatedValue.ToString();
+
+			StringBuilder returnValue = new StringBuilder("(subList ");
+
+			foreach (SubExpression sub in subExpressions)
+			{
+				returnValue.Append(sub.ToString());
+			}
+			returnValue.Append(")");
+			return returnValue.ToString();
+		}
 		public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment)
 		{
 			if (EvaluatedValue != null) return EvaluatedValue;
@@ -112,21 +127,6 @@ namespace Automation
 			}
 		}
 
-		public override string ToString()
-		{
-			if (IsAtom) return String.Format("(atom: {0})", atom.ToString());
-			if (IsFunctionCall) return String.Format("(functionCall: {0}({1}))", functionName, parameterList.ToString());
-			if (EvaluatedValue != null) return EvaluatedValue.ToString();
-
-			StringBuilder returnValue = new StringBuilder("(subList ");
-
-			foreach (SubExpression sub in subExpressions)
-			{
-				returnValue.Append(sub.ToString());
-			}
-			returnValue.Append(")");
-			return returnValue.ToString();
-		}
 		internal List<SubExpression> ParseFunctionCalls(Dictionary<string, EncapsulatedData> environment)
 		{
 			List<SubExpression> functionCallsParsed = new List<SubExpression>();
