@@ -200,12 +200,13 @@ namespace Automation
 			}
 			return functionCallsParsed;
 		}
+
+		/// <summary>
+		/// Parse unary operators in a List of SubExpressons
+		/// </summary>
 		internal LinkedList<SubExpression> ParseUnaryOperators(List<SubExpression> functionCallsParsed, Dictionary<string, EncapsulatedData> environment)
 		{
 			LinkedList<SubExpression> unaryOperatorsParsed = new LinkedList<SubExpression>();
-
-			// TODO review
-
 			// while
 			//          there is an operator followed by an evaluable atom or subexpression
 			//          AND preceded by another operator,
@@ -214,106 +215,74 @@ namespace Automation
 
 			for (int i = functionCallsParsed.Count - 1; i >= 0; i--)
 			{
-				if (i > 1)
+				SubExpression Current = functionCallsParsed[i];
+				// ensure there is something in unaryOperatorsParsed
+				if (unaryOperatorsParsed.Count == 0)
 				{
-					if (functionCallsParsed[i].IsEvaluable)
+					if (Current.IsEvaluable)
+						unaryOperatorsParsed.AddFirst(new SubExpression(Current.Evaluate(environment)));
+					else
+						throw new Exception(
+							String.Format(
+								"Expression ends with not-evaluable token {0}",
+								Current));
+				}
+				else
+				{
+					if (Current.IsOperator)
 					{
-						if (functionCallsParsed[i - 1].IsOperator)
+						if (i > 0)
 						{
-							if (functionCallsParsed[i - 2].IsOperator)
-							{ // Operator1 Operator2 Evaluable --> Operator1 Evaluated
-								unaryOperatorsParsed.AddFirst(
+							SubExpression Previous = functionCallsParsed[i - 1];
+							if (Previous.IsOperator)
+							{
+								unaryOperatorsParsed.First.Value =
+									new SubExpression(
+											Library.UnaryOperators[
+													functionCallsParsed[i].atom.content](
+													unaryOperatorsParsed.First.Value.Evaluate(environment)));
+							}
+							else
+							{
+								unaryOperatorsParsed.AddFirst(functionCallsParsed[i]);
+							}
+						}
+						else // i == 0
+						{
+							if (Current.IsOperator)
+							{
+								if (unaryOperatorsParsed.First.Value.IsEvaluable)
+									unaryOperatorsParsed.First.Value =
 										new SubExpression(
 												Library.UnaryOperators[
-														functionCallsParsed[i - 1].atom.content](
-														functionCallsParsed[i].Evaluate(environment))));
-								i = i - 1;
+														functionCallsParsed[i].atom.content](
+														unaryOperatorsParsed.First.Value.Evaluate(environment)));
+								else
+									throw new Exception(
+										String.Format(
+											"Non-evaluable expression parsed: {0}",
+											unaryOperatorsParsed.First.Value));
 							}
-							else // Evaluable Operator Evaluable --> Evaluable Operator Evaluated
+							else
 							{
-								unaryOperatorsParsed.AddFirst(
-										new SubExpression(
-												functionCallsParsed[i].Evaluate(environment)));
+								if (Current.IsEvaluable) unaryOperatorsParsed.AddFirst(Current);
+								else throw new Exception(
+									String.Format(
+										"Expression cannot be evaluated, starts with {0}",
+										Current));
 							}
 						}
-						else // TODO check. two evaluables after each other may be an error.
-						{
-							unaryOperatorsParsed.AddFirst(
-									new SubExpression(
-											functionCallsParsed[i].Evaluate(environment)));
-						}
 					}
-					else // if it is an Operator, leave it alone.
+					else // Current is not an operator
 					{
-						unaryOperatorsParsed.AddFirst(functionCallsParsed[i]);
-					}
-				}
-				else if (i == 1)
-				{
-					if (functionCallsParsed[i].IsEvaluable)
-					{
-						if (functionCallsParsed[i - 1].IsOperator)
-						{
+						if (Current.IsEvaluable)
 							unaryOperatorsParsed.AddFirst(
-									new SubExpression(
-											Library.UnaryOperators[
-													functionCallsParsed[i - 1].atom.content](
-													functionCallsParsed[i].Evaluate(environment))));
-							i = i - 1;
-						}
-						else // TODO : check: two evaluables after each other
-						{
-							unaryOperatorsParsed.AddFirst(
-									new SubExpression(
-											functionCallsParsed[i].Evaluate(environment)));
-						}
-					}
-					else
-					{
-						if (functionCallsParsed[i - 1].IsOperator && functionCallsParsed[i].IsOperator)
-						{
-							unaryOperatorsParsed.First.Value =
-									new SubExpression(
-											Library.UnaryOperators[
-													functionCallsParsed[i].atom.content](
-													unaryOperatorsParsed.First.Value.Evaluate(environment)));
-						}
+								new SubExpression(functionCallsParsed[i].Evaluate(environment)));
 						else
-						{
-							unaryOperatorsParsed.AddFirst(
-									functionCallsParsed[i]);
-						}
-					}
-				}
-				else // i == 0
-				{
-					if (functionCallsParsed[i].IsOperator)
-					{
-						if (unaryOperatorsParsed.First.Value.IsEvaluable)
-						{
-							unaryOperatorsParsed.First.Value =
-									new SubExpression(
-											Library.UnaryOperators[
-													functionCallsParsed[i].atom.content](
-													unaryOperatorsParsed.First.Value.Evaluate(environment)));
-						}
-						else
-						{
-							throw new Exception("parse error.");
-						}
-					}
-					else
-					{
-						if (functionCallsParsed[i].IsEvaluable)
-						{
-							unaryOperatorsParsed.AddFirst(
-									new SubExpression(
-														functionCallsParsed[i].Evaluate(environment)));
-						}
-						else
-						{
-							throw new Exception("parse error.");
-						}
+							throw new Exception(
+								String.Format(
+									"Evaluable token expected, {0} found.",
+									Current));
 					}
 				}
 			}
