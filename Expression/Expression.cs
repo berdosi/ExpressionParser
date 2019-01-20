@@ -96,7 +96,6 @@ namespace Automation
                 inString = false;
                 input = input.Remove(0, 1);
             }
-
         }
         public Expression(string inputString)
         {
@@ -136,17 +135,25 @@ namespace Automation
                     SubExpressionStack.Peek().Add(new SubExpression(atom));
                 }
                 else if (atom.level < currentLevel)
-                {
-                    SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
-                    SubExpressionStack.Peek().Add(newSubExpression);
-                    currentLevel = atom.level;
+                {   
+                    while (atom.level < currentLevel)
+                    {
+                        SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
+                        SubExpressionStack.Peek().Add(newSubExpression);
+                        currentLevel--;
+                    }
+                    SubExpressionStack.Peek().Add(new SubExpression(atom));
                 }
                 else // atom.level > currentLevel
                 {
-                    List<SubExpression> newSubExpressionList = new List<SubExpression>();
-                    newSubExpressionList.Add(new SubExpression(atom));
-                    SubExpressionStack.Push(newSubExpressionList);
-                    currentLevel = atom.level;
+                    while (atom.level > currentLevel)
+                    {
+                        List<SubExpression> newSubExpressionList = new List<SubExpression>();
+                        //newSubExpressionList.Add(new SubExpression(atom));
+                        SubExpressionStack.Push(newSubExpressionList);
+                        currentLevel++;
+                    }
+                    SubExpressionStack.Peek().Add(new SubExpression(atom));
                 }
             }
 
