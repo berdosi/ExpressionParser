@@ -144,9 +144,40 @@ namespace Automation.UnitTests
 		[Fact]
 		public void multipleNestedParen()
 		{
-			//Assert.Equal((new Expression("2 * ((2 + 1))")).Evaluate(environment), new EncapsulatedData((Decimal)6));
+			Assert.Equal((new Expression("2 * ((2 + 1))")).Evaluate(environment), new EncapsulatedData((Decimal)6));
 			Assert.Equal((new Expression("2 * ((2 + 1)) * 2")).Evaluate(environment), new EncapsulatedData((Decimal)12));
-			//Assert.Equal((new Expression("((2 + 1)) * 2")).Evaluate(environment), new EncapsulatedData((Decimal)6));
+			Assert.Equal((new Expression("((2 + 1)) * 2")).Evaluate(environment), new EncapsulatedData((Decimal)6));
+		}
+	}
+	public class Functions_Tests
+	{
+		private Dictionary<string, EncapsulatedData> environment = new Dictionary<string, EncapsulatedData>(){
+			{ "[one]", new EncapsulatedData((Decimal)1) },
+			{ "[just a string]", new EncapsulatedData("test string") },
+		};
+		public Functions_Tests()
+		{
+
+		}
+		[Fact]
+		public void simpleFunction()
+		{
+			Assert.Equal(new Expression("example()").Evaluate(environment), new EncapsulatedData("a"));
+		}
+		[Fact]
+		public void simpleFunctionAndOperator()
+		{
+			Assert.Equal(new Expression("\"a\" & example()").Evaluate(environment), new EncapsulatedData("aa"));
+		}
+		[Fact]
+		public void simpleFunctionWithParameter()
+		{
+			Assert.Equal(new Expression("Chr(32)").Evaluate(environment), new EncapsulatedData(" "));
+			Assert.Equal(new Expression("Chr(32) & \"a\"").Evaluate(environment), new EncapsulatedData(" a"));
+			Assert.Equal(new Expression("Chr(31 + 1)").Evaluate(environment), new EncapsulatedData(" "));
+			Assert.Equal(new Expression("Chr((31 + 1))").Evaluate(environment), new EncapsulatedData(" "));
+			Assert.Equal(new Expression("Chr(2 * (15 + 1))").Evaluate(environment), new EncapsulatedData(" "));
+			Assert.Equal(new Expression("Chr(((15 + 1) * 2))").Evaluate(environment), new EncapsulatedData(" "));
 		}
 	}
 }
