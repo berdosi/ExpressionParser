@@ -120,19 +120,43 @@ namespace Automation
             return retValue.ToString();
         }
         public EncapsulatedData Evaluate(Dictionary<string, EncapsulatedData> environment) {
+            // TODO evaluation can /should be done already at the atom level
+
             // create list of SubExpressions.
-            List<SubExpression> SubExpressions = new List<SubExpression>();
+            // keep track of the current stack
+            List<SubExpression> LevelZeroSubExpressionList = new List<SubExpression>();
+            Stack<List<SubExpression>> SubExpressionStack = new Stack<List<SubExpression>>();
+            SubExpressionStack.Push(LevelZeroSubExpressionList);
+
+            int currentLevel = 0;
             foreach (Atom atom in Atoms)
             {
-                SubExpressions.Add(new SubExpression(atom));
+                if (atom.level == currentLevel)
+                {
+                    SubExpressionStack.Peek().Add(new SubExpression(atom));
+                }
+                else if (atom.level < currentLevel)
+                {
+                    SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
+                    SubExpressionStack.Peek().Add(newSubExpression);
+                }
+                else // atom.level > currentLevel
+                {
+                    List<SubExpression> newSubExpressionList = new List<SubExpression>();
+                    newSubExpressionList.Add(new SubExpression(atom));
+                    SubExpressionStack.Push(newSubExpressionList);
+                }
             }
+
             // TODO
             // "roll" it up : keep merging SubExpressions on the same level into separate SubExpressions, 
             // until there is only one top-level SE left. 
             //throw new NotImplementedException("grouping atoms on the same level into subexpressions is not implemented yet.");
             // Create a SubExpression and evaluate it.
             // Evaluate the top-level SubExpression (and it will evaluate its chilren)
-            return new SubExpression(SubExpressions).Evaluate(environment);
+
+            //return new SubExpression(SubExpressions).Evaluate(environment);
+            return new SubExpression(LevelZeroSubExpressionList).Evaluate(environment);
         }
     }
 }

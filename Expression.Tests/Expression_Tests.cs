@@ -168,7 +168,7 @@ namespace Automation.UnitTests
 		{
 			Assert.Equal((new Expression("1--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(2)));
 			Assert.Equal((new Expression("1---1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(0)));
-			//Assert.Equal((new Expression("1/--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(1)));
+			Assert.Equal((new Expression("1/--1")).Evaluate(emptyEnvironment), new EncapsulatedData((Decimal)(1)));
 		}
 	}
 	public class Environment_Tests
@@ -191,5 +191,23 @@ namespace Automation.UnitTests
 		{
 			Assert.Equal((new Expression("[just a string]")).Evaluate(environment), new EncapsulatedData("test string"));
 		}		
+	}
+	public class Parentheticals_Tests
+	{
+		private Dictionary<string, EncapsulatedData> environment = new Dictionary<string, EncapsulatedData>(){
+			{ "[one]", new EncapsulatedData((Decimal)1) },
+			{ "[just a string]", new EncapsulatedData("test string") },
+		};
+
+		public Parentheticals_Tests()
+		{
+
+		}
+
+		[Fact]
+		public void simpleParen()
+		{
+			Assert.Equal((new Expression("2 * (2 + 1)")).Evaluate(environment), new EncapsulatedData((Decimal)6));
+		}
 	}
 }
