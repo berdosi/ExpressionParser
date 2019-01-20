@@ -139,13 +139,21 @@ namespace Automation
                 {
                     SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
                     SubExpressionStack.Peek().Add(newSubExpression);
+                    currentLevel = atom.level;
                 }
                 else // atom.level > currentLevel
                 {
                     List<SubExpression> newSubExpressionList = new List<SubExpression>();
                     newSubExpressionList.Add(new SubExpression(atom));
                     SubExpressionStack.Push(newSubExpressionList);
+                    currentLevel = atom.level;
                 }
+            }
+            
+            while (SubExpressionStack.Peek().First().level != 0)
+            {
+                SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
+                SubExpressionStack.Peek().Add(newSubExpression);
             }
 
             // TODO
