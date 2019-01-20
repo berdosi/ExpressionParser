@@ -149,7 +149,9 @@ namespace Automation
                     currentLevel = atom.level;
                 }
             }
-            
+
+            // make sure all the subexpressions are rolled up when expression
+            // doesn't end on level0 (e.g. "1 + 1 * (1 + 1)" ends on level1)
             while (SubExpressionStack.Peek().First().level != 0)
             {
                 SubExpression newSubExpression = new SubExpression(SubExpressionStack.Pop());
@@ -163,7 +165,6 @@ namespace Automation
             // Create a SubExpression and evaluate it.
             // Evaluate the top-level SubExpression (and it will evaluate its chilren)
 
-            //return new SubExpression(SubExpressions).Evaluate(environment);
             return new SubExpression(LevelZeroSubExpressionList).Evaluate(environment);
         }
     }
