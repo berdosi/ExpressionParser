@@ -57,6 +57,7 @@ namespace Automation.UnitTests
 						e.Message));
 			}
 		}
+		[Fact]
 		public void canCombine()
 		{
 			string testExpressionString1 = "2 * 3 + 1 + 4/2";
@@ -178,6 +179,22 @@ namespace Automation.UnitTests
 			Assert.Equal(new Expression("Chr((31 + 1))").Evaluate(environment), new EncapsulatedData(" "));
 			Assert.Equal(new Expression("Chr(2 * (15 + 1))").Evaluate(environment), new EncapsulatedData(" "));
 			Assert.Equal(new Expression("Chr(((15 + 1) * 2))").Evaluate(environment), new EncapsulatedData(" "));
+		}
+		[Fact]
+		public void twoParamFunction()
+		{
+			Assert.Equal(
+				new Expression(
+					"exampleConcat(\"a\",\"b\")").Evaluate(environment),
+				new EncapsulatedData("ab"));
+		}
+		[Fact]
+		public void multiParamFunction()
+		{
+			Assert.Equal(
+				new Expression(
+					"exampleConcat3(\"a\",\"b\",\"c\")").Evaluate(environment),
+				new EncapsulatedData("abc"));
 		}
 	}
 }

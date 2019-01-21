@@ -10,7 +10,7 @@ namespace Automation
         public Decimal numberData { get; }
         public DateTime dateTimeData { get; }
         public Boolean booleanData { get; }
-        public List<EncapsulatedData> parameterList { get; }
+        public LinkedList<EncapsulatedData> parameterList { get; }
 
         public EncapsulatedData(String data)
         {
@@ -32,7 +32,7 @@ namespace Automation
             type = DataType.String;
             booleanData = data;
         }
-        public EncapsulatedData(List<EncapsulatedData> data)
+        public EncapsulatedData(LinkedList<EncapsulatedData> data)
         {
             type = DataType.ParameterList;
             parameterList = data;
