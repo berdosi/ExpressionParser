@@ -69,7 +69,12 @@ namespace Automation.UnitTests
 			}
 			catch (Exception e)
 			{
-				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", testExpressionString1));
+				Assert.True(
+					false,
+					String.Format(
+						"Evaluating valid expression '{0}' should not throw. Original exception: {1}",
+						testExpressionString1,
+						e.Message));
 			}
 		}
 		[Fact]
@@ -86,7 +91,12 @@ namespace Automation.UnitTests
 			catch (Exception e)
 			{
 				//Console.WriteLine("--->" + e.Message);
-				Assert.True(false, String.Format("Evaluating valid expression '{0}' should not throw.", "1"));
+				Assert.True(
+					false,
+					String.Format(
+						"Evaluating valid expression '{0}' should not throw. Expression thrown: '{1}'", 
+						"1", 
+						e.Message));
 			}
 		}
 		[Fact]
