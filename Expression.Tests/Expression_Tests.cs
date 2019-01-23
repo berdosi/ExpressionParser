@@ -193,7 +193,7 @@ namespace Automation.UnitTests
 		{
 			Assert.Equal(
 				new Expression(
-					"exampleConcat3(\"a\",\"b\",\"c\")").Evaluate(environment),
+					"exampleConcatThree(\"a\",\"b\",\"c\")").Evaluate(environment),
 				new EncapsulatedData("abc"));
 		}
 	}

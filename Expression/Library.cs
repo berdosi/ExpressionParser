@@ -175,7 +175,7 @@ namespace Automation
                     }
                 },
                 {
-                    "exampleConcat3",
+                    "exampleConcatThree",
                     inputData => {
                         return new EncapsulatedData(
                             inputData.parameterList.First.Value.stringData
