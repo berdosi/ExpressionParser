@@ -27,6 +27,11 @@ namespace Automation
             type = DataType.DateTime;
             dateTimeData = data;
         }
+        public EncapsulatedData(DateTime data, bool ForceDateType)
+        {
+            type = ForceDateType ? DataType.Date : DataType.DateTime;
+            dateTimeData = data;
+        }
         public EncapsulatedData(Boolean data)
         {
             type = DataType.String;
