@@ -160,22 +160,19 @@ namespace Automation
 		private static Dictionary<string, Func<EncapsulatedData, EncapsulatedData>> FunctionLibrary
             = new Dictionary<string, Func<EncapsulatedData, EncapsulatedData>>
             {
-                {
-                    "example",
+                {   "example",
                     inputData => {
                         return new EncapsulatedData("a");
                     }
                 },
-                {
-                    "exampleConcat",
+                {   "exampleConcat",
                     inputData => {
                         return new EncapsulatedData(
                             inputData.parameterList.First.Value.stringData
                             + inputData.parameterList.First.Next.Value.stringData);
                     }
                 },
-                {
-                    "exampleConcatThree",
+                {   "exampleConcatThree",
                     inputData => {
                         return new EncapsulatedData(
                             inputData.parameterList.First.Value.stringData
@@ -183,8 +180,7 @@ namespace Automation
                             + inputData.parameterList.First.Next.Next.Value.stringData);
                     }
                 },
-                {
-                    "Chr",
+                {   "Chr",
                     inputData => {
                         return new EncapsulatedData(
                             Char.ConvertFromUtf32(
@@ -192,7 +188,41 @@ namespace Automation
                                     inputData.numberData)));
                     }
                 },
+                {   "Len",
+                    inputData => {
+                        CheckParameterCount(inputData, 1);
+                        EncapsulatedData firstValue = GetFirstParameter(inputData);
+
+                        if (firstValue.type == DataType.String)
+                            return new EncapsulatedData((decimal)firstValue.stringData.Length);
+                        throw new Exception(
+                            String.Format(
+                                "TypeError: {0} expected {1} found for {2}",
+                                DataType.String,
+                                firstValue.type,
+                                firstValue.ToString()));
+                    }
+                },
             };
+
+        /// Get the first parameter even if it is wrapped in a parameterList
+        private static EncapsulatedData GetFirstParameter(EncapsulatedData inputData)
+        {
+            if (inputData.type == DataType.ParameterList) return inputData.parameterList.First.Value;
+            else return inputData;
+        }
+
+        /// Throw an exception if the function's parameter count doesn't match the expected.
+        private static void CheckParameterCount(EncapsulatedData inputData, int expectedCount)
+        {
+            int realCount = inputData.type == DataType.ParameterList ? inputData.parameterList.Count : 1;
+            if (realCount != expectedCount)
+                throw new Exception(
+                    String.Format(
+                        "ParameterCountError: {0} parameters expected, {1} found.",
+                        expectedCount,
+                        realCount));
+        }
 		public static EncapsulatedData Evaluate(string functionName)
 		{
 			return FunctionLibrary[functionName](null);
