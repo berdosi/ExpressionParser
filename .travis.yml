@@ -1,0 +1,7 @@
+language: csharp
+solution: bpr-Expressions.sln
+dotnet: 2.2.103
+mono: none
+script:
+  - dotnet restore
+  - dotnet test
